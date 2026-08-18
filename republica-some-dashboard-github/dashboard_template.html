@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="da" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SoMe performance · Republica</title>
+<style>
+/* ---------------------------------------------------------------- tokens */
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb;
+  --page:#f9f9f7;
+  --ink-1:#0b0b0b;
+  --ink-2:#52514e;
+  --ink-3:#898781;
+  --grid:#e1e0d9;
+  --axis:#c3c2b7;
+  --border:rgba(11,11,11,.10);
+  --wash:rgba(11,11,11,.035);
+  --li:#2a78d6;
+  --ig:#eb6834;
+  --fb:#1baf7a;
+  --good:#006300;
+  --bad:#d03b3b;
+  --spark:#c3c2b7;
+  --shadow:0 1px 2px rgba(11,11,11,.05), 0 8px 24px -16px rgba(11,11,11,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19;
+    --page:#0d0d0d;
+    --ink-1:#ffffff;
+    --ink-2:#c3c2b7;
+    --ink-3:#898781;
+    --grid:#2c2c2a;
+    --axis:#383835;
+    --border:rgba(255,255,255,.10);
+    --wash:rgba(255,255,255,.045);
+    --li:#3987e5;
+    --ig:#d95926;
+    --fb:#199e70;
+    --good:#0ca30c;
+    --bad:#e66767;
+    --spark:#4a4a46;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19;
+  --page:#0d0d0d;
+  --ink-1:#ffffff;
+  --ink-2:#c3c2b7;
+  --ink-3:#898781;
+  --grid:#2c2c2a;
+  --axis:#383835;
+  --border:rgba(255,255,255,.10);
+  --wash:rgba(255,255,255,.045);
+  --li:#3987e5;
+  --ig:#d95926;
+  --fb:#199e70;
+  --good:#0ca30c;
+  --bad:#e66767;
+  --spark:#4a4a46;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--page);
+  color:var(--ink-1);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.app{max-width:1240px;margin:0 auto;padding:28px 20px 64px}
+
+/* ---------------------------------------------------------------- header */
+header.top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+header.top h1{font-size:22px;font-weight:640;letter-spacing:-.01em;margin:0 0 4px}
+header.top .sub{color:var(--ink-2);font-size:13.5px}
+header.top .spacer{flex:1 1 auto}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;
+  padding:3px 10px;font-size:12px;color:var(--ink-2);background:var(--surface-1)}
+.badge.demo{color:#8a4b00;border-color:rgba(250,178,25,.55);background:rgba(250,178,25,.12)}
+:root[data-theme="dark"] .badge.demo, :root:where(:not([data-theme="light"])) .badge.demo{color:#fab219}
+
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface-1)}
+.seg button{appearance:none;border:0;background:transparent;color:var(--ink-2);font:inherit;font-size:12.5px;
+  padding:6px 10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--wash);color:var(--ink-1);font-weight:560}
+
+/* ---------------------------------------------------------------- banner */
+.banner{border:1px solid rgba(250,178,25,.5);background:rgba(250,178,25,.1);border-radius:10px;
+  padding:11px 14px;margin-bottom:20px;font-size:13.5px;color:var(--ink-1);display:flex;gap:10px;align-items:flex-start}
+.banner b{font-weight:620}
+
+/* ---------------------------------------------------------------- kpis */
+.kpis{display:grid;grid-template-columns:1.45fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.tile .label{font-size:12.5px;color:var(--ink-2);margin-bottom:6px}
+.tile .value{font-size:26px;font-weight:640;letter-spacing:-.015em;line-height:1.1}
+.tile.hero .value{font-size:48px;font-weight:620;letter-spacing:-.025em}
+.tile .delta{font-size:12.5px;margin-top:5px;color:var(--ink-2);display:flex;align-items:center;gap:5px}
+.tile .delta .up{color:var(--good);font-weight:600}
+.tile .delta .down{color:var(--bad);font-weight:600}
+.tile .foot{font-size:12px;color:var(--ink-3);margin-top:5px}
+
+/* ---------------------------------------------------------------- controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface-1);
+  border-radius:999px;padding:6px 12px 6px 10px;font-size:13px;color:var(--ink-2);cursor:pointer}
+.chip[aria-pressed="true"]{color:var(--ink-1);font-weight:560;background:var(--wash);border-color:var(--axis)}
+.chip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+select,input[type="search"]{font:inherit;font-size:13px;color:var(--ink-1);background:var(--surface-1);
+  border:1px solid var(--border);border-radius:8px;padding:6px 9px}
+input[type="search"]{min-width:170px}
+.controls .grow{flex:1 1 auto}
+.btn{font:inherit;font-size:12.5px;border:1px solid var(--border);background:var(--surface-1);color:var(--ink-2);
+  border-radius:8px;padding:6px 11px;cursor:pointer}
+.btn:hover{background:var(--wash);color:var(--ink-1)}
+
+/* ---------------------------------------------------------------- chart */
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:16px 18px 12px;
+  box-shadow:var(--shadow);margin-bottom:20px}
+.card h2{font-size:15px;font-weight:620;margin:0 0 2px}
+.card .cap{font-size:12.5px;color:var(--ink-2);margin-bottom:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 6px;font-size:12.5px;color:var(--ink-2)}
+.legend span.k{display:inline-flex;align-items:center;gap:7px}
+.legend .key{width:14px;height:2px;border-radius:1px;display:inline-block}
+#chartWrap{position:relative}
+#tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .09s;background:var(--surface-1);
+  border:1px solid var(--axis);border-radius:9px;padding:8px 10px;font-size:12.5px;box-shadow:var(--shadow);
+  min-width:150px;z-index:5}
+#tip .tt{font-weight:620;margin-bottom:5px;font-size:12px;color:var(--ink-2)}
+#tip .tr{display:flex;align-items:center;gap:8px;justify-content:space-between}
+#tip .tr b{font-variant-numeric:tabular-nums;font-weight:600}
+details.tbl{margin-top:8px;border-top:1px solid var(--grid);padding-top:8px}
+details.tbl summary{font-size:12.5px;color:var(--ink-2);cursor:pointer}
+table.data{border-collapse:collapse;font-size:12.5px;margin-top:10px;width:100%}
+table.data th,table.data td{text-align:right;padding:4px 8px;border-bottom:1px solid var(--grid);
+  font-variant-numeric:tabular-nums}
+table.data th:first-child,table.data td:first-child{text-align:left}
+table.data th{color:var(--ink-2);font-weight:560}
+
+/* ---------------------------------------------------------------- posts */
+.listhead{display:flex;align-items:baseline;gap:10px;margin:26px 0 10px}
+.listhead h2{font-size:15px;font-weight:620;margin:0}
+.listhead .n{font-size:12.5px;color:var(--ink-3)}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);
+  overflow:hidden}
+.rowmain{display:grid;grid-template-columns:104px minmax(190px,1.15fr) minmax(430px,2.15fr);
+  gap:16px;align-items:center;padding:12px 14px;cursor:pointer}
+.cellwrap{display:grid;grid-template-columns:repeat(6,minmax(56px,1fr));gap:12px;align-items:start}
+.rowmain:hover{background:var(--wash)}
+.media{width:104px;height:104px;display:flex;align-items:center;justify-content:center;position:relative;
+  border-radius:8px;overflow:hidden;background:var(--wash)}
+.media img{max-width:100%;max-height:100%;display:block;border-radius:8px}
+.media .noimg{font-size:11px;color:var(--ink-3);text-align:center;padding:6px;line-height:1.35}
+.media .play{position:absolute;inset:auto 6px 6px auto;width:24px;height:24px;border-radius:50%;
+  background:rgba(11,11,11,.62);display:flex;align-items:center;justify-content:center}
+.media .play svg{width:10px;height:10px;fill:#fff;margin-left:1px}
+.meta{min-width:0}
+.plat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin-bottom:4px}
+.plat svg{width:13px;height:13px}
+.meta .when{font-size:11.5px;color:var(--ink-3);font-weight:400;margin-left:2px}
+.cap2{font-size:13px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;margin:0}
+.mt{display:inline-block;font-size:10.5px;color:var(--ink-3);border:1px solid var(--border);border-radius:4px;
+  padding:0 5px;margin-top:5px;text-transform:uppercase;letter-spacing:.04em}
+.cell{text-align:right}
+.cell .k{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.045em;margin-bottom:3px}
+.cell .v{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.cell .s{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.cell .v.na{color:var(--ink-3);font-weight:400}
+.sparkcell svg{display:block;margin-left:auto}
+.sparkcell .lbl{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.045em;margin-bottom:4px;
+  text-align:right}
+.detail{display:none;padding:2px 14px 16px;border-top:1px solid var(--grid)}
+.row.open .detail{display:block}
+.detail .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px;margin:14px 0 4px}
+.detail .box{border:1px solid var(--border);border-radius:9px;padding:9px 11px}
+.detail .box .k{font-size:11px;color:var(--ink-3);margin-bottom:3px}
+.detail .box .v{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.mini h4{font-size:12px;font-weight:600;color:var(--ink-2);margin:0 0 6px}
+.detail a.perm{font-size:12.5px;color:var(--ink-2)}
+.empty{border:1px dashed var(--axis);border-radius:12px;padding:34px;text-align:center;color:var(--ink-2);font-size:14px}
+
+footer.notes{margin-top:34px;border-top:1px solid var(--grid);padding-top:16px;color:var(--ink-3);font-size:12px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+footer.notes b{color:var(--ink-2);font-weight:600}
+
+@media (max-width:1080px){
+  .kpis{grid-template-columns:1fr 1fr 1fr}
+  .rowmain{grid-template-columns:88px 1fr;grid-auto-rows:auto;row-gap:8px}
+  .media{width:88px;height:88px}
+  .cellwrap{grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));padding-top:4px;
+    border-top:1px solid var(--grid)}
+}
+@media (max-width:620px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .tile.hero{grid-column:1/-1}
+}
+@media print{
+  body{background:#fff}
+  .controls,.seg{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="top">
+  <div>
+    <h1>SoMe performance · Republica</h1>
+    <div class="sub" id="subline"></div>
+  </div>
+  <div class="spacer"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="badge" id="srcBadge"></span>
+    <div class="seg" role="group" aria-label="Tema">
+      <button data-theme-set="auto" aria-pressed="true">Auto</button>
+      <button data-theme-set="light" aria-pressed="false">Lys</button>
+      <button data-theme-set="dark" aria-pressed="false">Mørk</button>
+    </div>
+  </div>
+</header>
+
+<div class="banner" id="demoBanner" hidden>
+  <div>⚠︎</div>
+  <div><b>Demo-data.</b> Tallene er opdigtede og viser kun, hvordan dashboardet fungerer.
+  Når API-adgangen er sat op (se OPSAETNING.md), erstattes de af rigtige tal og opdateres automatisk.</div>
+</div>
+
+<section class="kpis" id="kpis" aria-label="Nøgletal"></section>
+
+<section class="controls" aria-label="Filtre">
+  <div class="chips" id="platChips" role="group" aria-label="Platform"></div>
+  <label class="badge" style="gap:6px">Periode
+    <select id="period" aria-label="Periode">
+      <option value="7">7 dage</option>
+      <option value="30" selected>30 dage</option>
+      <option value="90">90 dage</option>
+      <option value="0">Alt</option>
+    </select>
+  </label>
+  <label class="badge" style="gap:6px">Medie
+    <select id="mtype" aria-label="Medietype">
+      <option value="">Alle</option>
+      <option value="image">Billede</option>
+      <option value="video">Video</option>
+      <option value="carousel">Karrusel</option>
+      <option value="text">Kun tekst</option>
+    </select>
+  </label>
+  <label class="badge" style="gap:6px">Sortér
+    <select id="sort" aria-label="Sortering">
+      <option value="date">Nyeste først</option>
+      <option value="reach">Reach</option>
+      <option value="eng">Engagement</option>
+      <option value="er">Engagement rate</option>
+      <option value="clicks">Klik</option>
+    </select>
+  </label>
+  <input type="search" id="q" placeholder="Søg i tekst…" aria-label="Søg i opslagstekst">
+  <div class="grow"></div>
+  <button class="btn" id="csv">Hent CSV</button>
+  <label class="btn" style="display:inline-flex;align-items:center;gap:6px">
+    Indlæs posts.json
+    <input type="file" id="file" accept=".json,application/json" style="display:none">
+  </label>
+</section>
+
+<section class="card">
+  <h2>Ny reach pr. dag</h2>
+  <div class="cap" id="chartCap">Hvor mange nye mennesker opslagene nåede hver dag — summeret pr. platform.</div>
+  <div class="legend" id="legend"></div>
+  <div id="chartWrap"><div id="chart"></div><div id="tip" role="status"></div></div>
+  <details class="tbl">
+    <summary>Vis som datatabel</summary>
+    <div id="chartTable"></div>
+  </details>
+</section>
+
+<div class="listhead">
+  <h2>Opslag</h2>
+  <span class="n" id="count"></span>
+</div>
+<div class="rows" id="rows"></div>
+
+<footer class="notes">
+  <div><b>Reach</b> — antal unikke personer der har set opslaget. LinkedIn: uniqueImpressionsCount ·
+    Facebook: post_impressions_unique · Instagram: reach.</div>
+  <div><b>Engagement</b> — reaktioner + kommentarer + delinger (+ gemte på Instagram). Klik tælles separat.</div>
+  <div><b>Engagement rate</b> — engagement delt med reach. Beregnes på reach, ikke følgere, så tal kan
+    sammenlignes på tværs af platforme.</div>
+  <div><b>Klik / CTR</b> — link- og indholdsklik delt med impressions. Instagram giver ikke klik pr. opslag,
+    og feltet vises som “–” frem for 0.</div>
+  <div><b>Video</b> — visninger på 3+ sekunder, gennemsnitlig visningstid og gennemførelsesgrad
+    (gns. visningstid / videolængde).</div>
+  <div><b>Nye følgere</b> — følgere tilskrevet opslaget. Findes kun på Instagram og LinkedIn; Facebook
+    rapporterer det ikke pr. opslag.</div>
+</footer>
+
+</div>
+
+<script>
+const DATA = /*__DATA__*/{"posts":[],"source":"demo","generated_at":null,"accounts":[]};
+
+/* ----------------------------------------------------------- formattering */
+const nf = new Intl.NumberFormat('da-DK');
+const nf1 = new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1});
+/* dansk kompakt: fulde tal op til 1 mio., derefter "1,2 mio." — undgår Intl's "t"-forkortelse */
+const cf = {format: v => v>=1e6
+  ? (v/1e6).toLocaleString('da-DK',{maximumFractionDigits:1})+' mio.'
+  : nf.format(Math.round(v))};
+const pf = (v,d=1)=> (v*100).toLocaleString('da-DK',{minimumFractionDigits:d,maximumFractionDigits:d})+' %';
+const num = v => (v===null||v===undefined) ? '–' : nf.format(Math.round(v));
+const dtf = new Intl.DateTimeFormat('da-DK',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const dtfs = new Intl.DateTimeFormat('da-DK',{day:'numeric',month:'short'});
+
+const PLATFORMS = {
+  linkedin : {name:'LinkedIn',  color:'var(--li)', icon:'M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.27-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.81V21H9z'},
+  facebook : {name:'Facebook',  color:'var(--fb)', icon:'M13.5 22v-8h2.8l.42-3.25H13.5V8.6c0-.94.26-1.58 1.6-1.58h1.72V4.11C16.53 4.04 15.6 4 14.53 4c-2.6 0-4.28 1.59-4.28 4.5v2.25H7.4V14h2.85v8z'},
+  instagram: {name:'Instagram', color:'var(--ig)', icon:'M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.96.24 2.65.51.71.28 1.31.65 1.9 1.25.6.59.97 1.19 1.25 1.9.27.69.46 1.48.51 2.65.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.24 1.96-.51 2.65-.28.71-.65 1.31-1.25 1.9-.59.6-1.19.97-1.9 1.25-.69.27-1.48.46-2.65.51-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.96-.24-2.65-.51-.71-.28-1.31-.65-1.9-1.25-.6-.59-.97-1.19-1.25-1.9-.27-.69-.46-1.48-.51-2.65C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.24-1.96.51-2.65.28-.71.65-1.31 1.25-1.9.59-.6 1.19-.97 1.9-1.25.69-.27 1.48-.46 2.65-.51C8.42 2.21 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.5.01-4.73.07-.94.04-1.45.2-1.79.33-.45.17-.77.38-1.11.72-.34.34-.55.66-.72 1.11-.13.34-.29.85-.33 1.79-.06 1.23-.07 1.58-.07 4.73s.01 3.5.07 4.73c.04.94.2 1.45.33 1.79.17.45.38.77.72 1.11.34.34.66.55 1.11.72.34.13.85.29 1.79.33 1.23.06 1.58.07 4.73.07s3.5-.01 4.73-.07c.94-.04 1.45-.2 1.79-.33.45-.17.77-.38 1.11-.72.34-.34.55-.66.72-1.11.13-.34.29-.85.33-1.79.06-1.23.07-1.58.07-4.73s-.01-3.5-.07-4.73c-.04-.94-.2-1.45-.33-1.79a2.98 2.98 0 00-.72-1.11 2.98 2.98 0 00-1.11-.72c-.34-.13-.85-.29-1.79-.33-1.23-.06-1.58-.07-4.73-.07zm0 3.37a5.45 5.45 0 110 10.9 5.45 5.45 0 010-10.9zm0 1.98a3.47 3.47 0 100 6.94 3.47 3.47 0 000-6.94zm6.94-2.2a1.27 1.27 0 11-2.55 0 1.27 1.27 0 012.55 0z'}
+};
+const MTYPE = {image:'Billede',video:'Video',carousel:'Karrusel',text:'Tekst',reel:'Reel'};
+
+/* ----------------------------------------------------------- afledte tal */
+function derive(p){
+  const m = p.metrics||{};
+  const eng = (m.engagements!==null&&m.engagements!==undefined) ? m.engagements
+            : ((m.reactions||0)+(m.comments||0)+(m.shares||0)+(m.saves||0));
+  const er  = m.reach ? eng/m.reach : null;
+  const ctr = (m.clicks!==null&&m.clicks!==undefined&&m.impressions) ? m.clicks/m.impressions : null;
+  return {...p, _eng:eng, _er:er, _ctr:ctr, _t:new Date(p.published_at).getTime()};
+}
+let POSTS = (DATA.posts||[]).map(derive);
+
+/* daglig tilvækst pr. opslag (historikken er kumulativ) */
+function dailyDeltas(post){
+  const h = post.history||[]; const out=[];
+  for(let i=0;i<h.length;i++){
+    const prev = i? h[i-1] : {reach:0,engagements:0,impressions:0};
+    out.push({d:h[i].d,
+      reach:Math.max(0,(h[i].reach||0)-(prev.reach||0)),
+      eng:Math.max(0,(h[i].engagements||0)-(prev.engagements||0))});
+  }
+  return out;
+}
+
+/* ----------------------------------------------------------- state */
+const state = {plats:new Set(['linkedin','facebook','instagram']), period:30, mtype:'', sort:'date', q:''};
+
+function cutoff(){
+  if(!state.period) return 0;
+  const newest = POSTS.length ? Math.max(...POSTS.map(p=>p._t)) : Date.now();
+  return newest - state.period*864e5;
+}
+function visible(){
+  const c = cutoff(); const q = state.q.trim().toLowerCase();
+  let out = POSTS.filter(p=> state.plats.has(p.platform)
+    && p._t >= c
+    && (!state.mtype || p.media_type===state.mtype || (state.mtype==='video'&&p.media_type==='reel'))
+    && (!q || (p.caption||'').toLowerCase().includes(q)));
+  const key = {date:p=>p._t, reach:p=>p.metrics.reach||0, eng:p=>p._eng,
+               er:p=>p._er||0, clicks:p=>p.metrics.clicks||0}[state.sort];
+  out.sort((a,b)=>key(b)-key(a));
+  return out;
+}
+
+/* ----------------------------------------------------------- KPI'er */
+function renderKpis(list){
+  const sum = f => list.reduce((s,p)=>s+(f(p)||0),0);
+  const reach = sum(p=>p.metrics.reach), eng = sum(p=>p._eng);
+  const clicks = list.some(p=>p.metrics.clicks!=null) ? sum(p=>p.metrics.clicks) : null;
+  const imps = sum(p=>p.metrics.impressions);
+  const er = reach ? eng/reach : 0;
+
+  /* sammenligning med foregående, lige så lange periode */
+  let deltaHtml = '<span style="color:var(--ink-3)">ingen sammenligning for “Alt”</span>';
+  if(state.period){
+    const c = cutoff(), c0 = c - state.period*864e5;
+    const prev = POSTS.filter(p=>state.plats.has(p.platform) && p._t>=c0 && p._t<c);
+    const pr = prev.reduce((s,p)=>s+(p.metrics.reach||0),0);
+    if(pr){
+      const d = (reach-pr)/pr;
+      deltaHtml = `<span class="${d>=0?'up':'down'}">${d>=0?'▲':'▼'} ${pf(Math.abs(d),0)}</span>`
+        + `<span>vs. forrige ${state.period} dage</span>`;
+    } else deltaHtml = '<span style="color:var(--ink-3)">ingen opslag i forrige periode</span>';
+  }
+
+  const best = list.slice().sort((a,b)=>(b._er||0)-(a._er||0))[0];
+  const byPlat = {};
+  list.forEach(p=>{byPlat[p.platform]=(byPlat[p.platform]||0)+(p.metrics.reach||0)});
+  const top = Object.entries(byPlat).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('kpis').innerHTML = `
+    <div class="tile hero">
+      <div class="label">Samlet reach</div>
+      <div class="value">${reach?cf.format(reach):'–'}</div>
+      <div class="delta">${deltaHtml}</div>
+    </div>
+    <div class="tile">
+      <div class="label">Engagement</div>
+      <div class="value">${nf.format(eng)}</div>
+      <div class="foot">reaktioner, kommentarer, delinger, gemte</div>
+    </div>
+    <div class="tile">
+      <div class="label">Engagement rate</div>
+      <div class="value">${reach?pf(er,2):'–'}</div>
+      <div class="foot">engagement / reach</div>
+    </div>
+    <div class="tile">
+      <div class="label">Klik${clicks!=null&&imps?' · CTR':''}</div>
+      <div class="value">${clicks==null?'–':nf.format(clicks)}</div>
+      <div class="foot">${clicks!=null&&imps?pf(clicks/imps,2)+' af impressions':'ikke rapporteret'}</div>
+    </div>
+    <div class="tile">
+      <div class="label">Bedste opslag</div>
+      <div class="value">${best?pf(best._er,1):'–'}</div>
+      <div class="foot">${best?PLATFORMS[best.platform].name+' · '+dtfs.format(new Date(best._t)):'—'}</div>
+    </div>`;
+  if(top) document.getElementById('chartCap').textContent =
+    `Hvor mange nye mennesker opslagene nåede hver dag — summeret pr. platform. Størst reach i perioden: ${PLATFORMS[top[0]].name}.`;
+}
+
+/* ----------------------------------------------------------- linjediagram */
+const SERIES = ['linkedin','facebook','instagram'];
+let chartData = [];
+
+function buildSeries(list){
+  const map = new Map();  /* dato -> {platform: reach} */
+  list.forEach(p=>dailyDeltas(p).forEach(d=>{
+    if(!map.has(d.d)) map.set(d.d,{linkedin:0,facebook:0,instagram:0});
+    map.get(d.d)[p.platform]+=d.reach;
+  }));
+  const c = cutoff();
+  return [...map.entries()]
+    .filter(([d])=> !state.period || new Date(d+'T12:00:00').getTime()>=c)
+    .sort((a,b)=>a[0]<b[0]?-1:1)
+    .map(([d,v])=>({d,...v}));
+}
+
+function renderChart(){
+  const wrap = document.getElementById('chart');
+  const W = wrap.clientWidth || 900, H = 240;
+  const narrow = W < 560;
+  const m = {t:14, r: narrow?12:64, b:26, l: narrow?44:58};
+  const rows = chartData;
+  const active = SERIES.filter(s=>state.plats.has(s));
+
+  /* én serie behøver ingen legend — titlen siger hvad der er plottet */
+  document.getElementById('legend').innerHTML = active.length>1
+    ? active.map(s=>`<span class="k"><i class="key" style="background:${PLATFORMS[s].color}"></i>${PLATFORMS[s].name}</span>`).join('')
+    : '';
+
+  if(!rows.length){ wrap.innerHTML='<div class="empty">Ingen data i den valgte periode.</div>';
+    document.getElementById('chartTable').innerHTML=''; return; }
+
+  const maxV = Math.max(1,...rows.flatMap(r=>active.map(s=>r[s]||0)));
+  const step = Math.pow(10,Math.floor(Math.log10(maxV)))* (maxV/Math.pow(10,Math.floor(Math.log10(maxV)))>5?2:1);
+  const top = Math.ceil(maxV/step)*step;
+  const x = i => m.l + (W-m.l-m.r) * (rows.length===1?0.5:i/(rows.length-1));
+  const y = v => m.t + (H-m.t-m.b) * (1 - v/top);
+
+  let g = '';
+  for(let v=0; v<=top+1e-9; v+=step){
+    g += `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="${v===0?'var(--axis)':'var(--grid)'}" stroke-width="1"/>`
+       + `<text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="10.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">${cf.format(v)}</text>`;
+  }
+  const tickEvery = Math.max(1,Math.ceil(rows.length/8));
+  rows.forEach((r,i)=>{ if(i%tickEvery===0||i===rows.length-1)
+    g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="var(--ink-3)">${dtfs.format(new Date(r.d+'T12:00:00'))}</text>`;});
+
+  let lines='';
+  active.forEach(s=>{
+    const pts = rows.map((r,i)=>`${x(i)},${y(r[s]||0)}`).join(' ');
+    lines += `<polyline points="${pts}" fill="none" stroke="${PLATFORMS[s].color}" stroke-width="2"
+               stroke-linejoin="round" stroke-linecap="round"/>`;
+    const li = rows.length-1;
+    lines += `<circle cx="${x(li)}" cy="${y(rows[li][s]||0)}" r="4" fill="${PLATFORMS[s].color}"
+               stroke="var(--surface-1)" stroke-width="2"/>`;
+  });
+  /* direkte slut-label på højeste serie, så identitet ikke kun er farve */
+  const lastRow = rows[rows.length-1];
+  const lead = active.slice().sort((a,b)=>(lastRow[b]||0)-(lastRow[a]||0))[0];
+  if(lead && !narrow) lines += `<text x="${W-m.r+8}" y="${y(lastRow[lead]||0)+4}" font-size="11" fill="var(--ink-2)"
+      style="font-variant-numeric:tabular-nums">${cf.format(lastRow[lead]||0)}</text>`;
+
+  wrap.innerHTML = `<svg width="${W}" height="${H}" role="img"
+      aria-label="Ny reach pr. dag pr. platform. Datatabel findes under diagrammet.">
+      ${g}<line x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${H-m.b}" stroke="var(--axis)"/>${lines}
+      <line id="cross" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="var(--axis)" stroke-width="1" opacity="0"/>
+      <rect id="hit" x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/>
+    </svg>`;
+
+  /* hover: crosshair + tooltip */
+  const svg = wrap.querySelector('svg'), cross = wrap.querySelector('#cross'), tip = document.getElementById('tip');
+  const move = ev=>{
+    const r = svg.getBoundingClientRect();
+    const px = (ev.touches?ev.touches[0].clientX:ev.clientX) - r.left;
+    let i = Math.round((px-m.l)/((W-m.l-m.r)||1)*(rows.length-1));
+    i = Math.max(0,Math.min(rows.length-1,i));
+    cross.setAttribute('x1',x(i)); cross.setAttribute('x2',x(i)); cross.setAttribute('opacity','1');
+    tip.style.opacity=1;
+    tip.innerHTML = `<div class="tt">${new Date(rows[i].d+'T12:00:00').toLocaleDateString('da-DK',{weekday:'short',day:'numeric',month:'short'})}</div>`
+      + active.map(s=>`<div class="tr"><span><i class="key" style="display:inline-block;width:10px;height:2px;background:${PLATFORMS[s].color};vertical-align:middle;margin-right:6px"></i>${PLATFORMS[s].name}</span><b>${nf.format(rows[i][s]||0)}</b></div>`).join('');
+    const tw = tip.offsetWidth;
+    tip.style.left = Math.min(W-tw-4,Math.max(0,x(i)-tw/2))+'px';
+    tip.style.top = '4px';
+  };
+  svg.addEventListener('mousemove',move);
+  svg.addEventListener('touchmove',move,{passive:true});
+  svg.addEventListener('mouseleave',()=>{cross.setAttribute('opacity','0');tip.style.opacity=0;});
+
+  /* datatabel */
+  document.getElementById('chartTable').innerHTML =
+    `<table class="data"><thead><tr><th>Dato</th>${active.map(s=>`<th>${PLATFORMS[s].name}</th>`).join('')}<th>I alt</th></tr></thead><tbody>`
+    + rows.slice().reverse().map(r=>`<tr><td>${dtfs.format(new Date(r.d+'T12:00:00'))}</td>`
+        + active.map(s=>`<td>${nf.format(r[s]||0)}</td>`).join('')
+        + `<td>${nf.format(active.reduce((s2,s)=>s2+(r[s]||0),0))}</td></tr>`).join('')
+    + '</tbody></table>';
+}
+
+/* ----------------------------------------------------------- sparkline */
+function sparkline(post,w=84,h=30){
+  const d = (post.history||[]).slice(-14);
+  if(d.length<2) return `<svg width="${w}" height="${h}"></svg>`;
+  const max = Math.max(1,...d.map(v=>v.reach||0));
+  /* 6px indrykning i hver ende, så slutpunktets 2px surface-ring ikke klippes */
+  const X = i=>6+ (w-12)*i/(d.length-1), Y = v=>h-6-(h-12)*v/max;
+  const pts = d.map((v,i)=>`${X(i)},${Y(v.reach||0)}`).join(' ');
+  const c = PLATFORMS[post.platform].color;
+  return `<svg width="${w}" height="${h}" aria-hidden="true">
+    <polyline points="${pts}" fill="none" stroke="var(--spark)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(d.length-1)}" cy="${Y(d[d.length-1].reach||0)}" r="3.5" fill="${c}" stroke="var(--surface-1)" stroke-width="2"/>
+  </svg>`;
+}
+
+/* Mini-grafer tegnes først når rækken åbnes, så bredden kan måles og marks ikke strækkes */
+function miniChart(post,field,label,w){
+  const h = post.history||[]; const ht=92;
+  if(h.length<2) return `<div style="font-size:12px;color:var(--ink-3)">For lidt historik endnu.</div>`;
+  const vals = h.map(r=>r[field]||0), max=Math.max(1,...vals);
+  const X = i=>6+(w-12)*i/(h.length-1), Y=v=>ht-22-(ht-32)*v/max;
+  const c = PLATFORMS[post.platform].color;
+  return `<svg width="${w}" height="${ht}" role="img" aria-label="${label} over tid, seneste værdi ${nf.format(vals[vals.length-1])}">
+    <line x1="0" x2="${w}" y1="${ht-22}" y2="${ht-22}" stroke="var(--axis)"/>
+    <polyline points="${h.map((r,i)=>`${X(i)},${Y(r[field]||0)}`).join(' ')}" fill="none"
+      stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(h.length-1)}" cy="${Y(vals[vals.length-1])}" r="4" fill="${c}" stroke="var(--surface-1)" stroke-width="2"/>
+    <text x="0" y="${ht-6}" font-size="10.5" fill="var(--ink-3)">${dtfs.format(new Date(h[0].d+'T12:00:00'))}</text>
+    <text x="${w}" y="${ht-6}" font-size="10.5" fill="var(--ink-3)" text-anchor="end">${dtfs.format(new Date(h[h.length-1].d+'T12:00:00'))}</text>
+    <text x="${X(h.length-1)}" y="${Math.max(12,Y(vals[vals.length-1])-9)}" font-size="11" fill="var(--ink-2)"
+      text-anchor="end" style="font-variant-numeric:tabular-nums">${nf.format(vals[vals.length-1])}</text>
+  </svg>`;
+}
+function fillMini(row,post){
+  row.querySelectorAll('.mc').forEach(box=>{
+    if(box.dataset.done) return;
+    const w = Math.max(160, box.clientWidth||280);
+    box.innerHTML = miniChart(post, box.dataset.field, box.dataset.label, w);
+    box.dataset.done = '1';
+  });
+}
+
+/* ----------------------------------------------------------- opslagsrækker */
+function cell(k,v,s){return `<div class="cell"><div class="k">${k}</div>
+  <div class="v${v==='–'?' na':''}">${v}</div>${s?`<div class="s">${s}</div>`:''}</div>`;}
+
+function renderRows(list){
+  document.getElementById('count').textContent =
+    `${list.length} ${list.length===1?'opslag':'opslag'} · ${state.period?'seneste '+state.period+' dage':'hele perioden'}`;
+  const el = document.getElementById('rows');
+  if(!list.length){ el.innerHTML='<div class="empty">Ingen opslag matcher filtrene.</div>'; return; }
+
+  el.innerHTML = list.map(p=>{
+    const P = PLATFORMS[p.platform], m = p.metrics;
+    const isVid = p.media_type==='video'||p.media_type==='reel';
+    const media = p.thumbnail
+      ? `<img src="${p.thumbnail}" alt="Medie fra opslag ${dtfs.format(new Date(p._t))}">${isVid?'<span class="play"><svg viewBox="0 0 10 10"><polygon points="1,0 10,5 1,10"/></svg></span>':''}`
+      : `<div class="noimg">Kun tekst</div>`;
+    return `<article class="row" data-id="${p.id}">
+      <div class="rowmain" tabindex="0" role="button" aria-expanded="false">
+        <div class="media">${media}</div>
+        <div class="meta">
+          <div class="plat" style="color:${P.color}">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="${P.icon}"/></svg>
+            <span style="color:var(--ink-1)">${P.name}</span>
+            <span class="when">${dtf.format(new Date(p._t))}</span>
+          </div>
+          <p class="cap2">${(p.caption||'').replace(/</g,'&lt;')}</p>
+          <span class="mt">${MTYPE[p.media_type]||p.media_type}</span>
+        </div>
+        <div class="cellwrap">
+          ${cell('Reach',num(m.reach),m.impressions?nf.format(m.impressions)+' impr.':'')}
+          ${cell('Engagement',num(p._eng),`${num(m.reactions)} / ${num(m.comments)} / ${num(m.shares)}`)}
+          ${cell('Eng. rate',p._er!=null?pf(p._er,1):'–','af reach')}
+          ${cell('Klik',num(m.clicks),p._ctr!=null?pf(p._ctr,2)+' CTR':'')}
+          ${cell(isVid?'Video':'Nye følg.',
+                 isVid?num(m.video_views):num(m.follows),
+                 isVid&&m.completion_rate?pf(m.completion_rate,0)+' gennemført':'')}
+          <div class="cell sparkcell"><div class="lbl">Udvikling</div>${sparkline(p)}</div>
+        </div>
+      </div>
+      <div class="detail">
+        <div class="grid">
+          ${[['Impressions',num(m.impressions)],['Reach',num(m.reach)],['Reaktioner',num(m.reactions)],
+             ['Kommentarer',num(m.comments)],['Delinger',num(m.shares)],['Gemte',num(m.saves)],
+             ['Klik',num(m.clicks)],['Nye følgere',num(m.follows)],
+             ...(isVid?[['Videovisninger',num(m.video_views)],
+                        ['Gns. visningstid',m.avg_watch_time_s!=null?nf1.format(m.avg_watch_time_s)+' s':'–'],
+                        ['Gennemført',m.completion_rate!=null?pf(m.completion_rate,0):'–'],
+                        ['Længde',m.video_length_s!=null?m.video_length_s+' s':'–']]:[])]
+            .map(([k,v])=>`<div class="box"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('')}
+        </div>
+        <div class="mini">
+          <div><h4>Reach over tid</h4><div class="mc" data-field="reach" data-label="Reach"></div></div>
+          <div><h4>Engagement over tid</h4><div class="mc" data-field="engagements" data-label="Engagement"></div></div>
+        </div>
+        <p style="margin:14px 0 0">${p.permalink?`<a class="perm" href="${p.permalink}" target="_blank" rel="noopener">Åbn opslaget på ${P.name} →</a>`:''}
+        <span style="font-size:11.5px;color:var(--ink-3);margin-left:10px">${p.account||''}</span></p>
+      </div>
+    </article>`;
+  }).join('');
+
+  const byId = new Map(list.map(p=>[String(p.id),p]));
+  el.querySelectorAll('.rowmain').forEach(r=>{
+    const toggle = ()=>{const row=r.closest('.row');const open=row.classList.toggle('open');
+      r.setAttribute('aria-expanded',open);
+      if(open) fillMini(row, byId.get(row.dataset.id));};
+    r.addEventListener('click',e=>{if(e.target.closest('a'))return;toggle();});
+    r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
+}
+
+/* ----------------------------------------------------------- CSV */
+function csv(list){
+  const head = ['platform','konto','publiceret','medietype','tekst','impressions','reach','reaktioner',
+    'kommentarer','delinger','gemte','engagement','engagement_rate','klik','ctr','nye_foelgere',
+    'videovisninger','gns_visningstid_s','gennemfoert','permalink'];
+  const esc = v => v==null?'':/[";\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+  const rows = list.map(p=>{const m=p.metrics;return [p.platform,p.account,p.published_at,p.media_type,
+    (p.caption||'').replace(/\s+/g,' '),m.impressions,m.reach,m.reactions,m.comments,m.shares,m.saves,
+    p._eng,p._er!=null?p._er.toFixed(4):'',m.clicks,p._ctr!=null?p._ctr.toFixed(4):'',m.follows,
+    m.video_views,m.avg_watch_time_s,m.completion_rate,p.permalink].map(esc).join(';');});
+  const blob = new Blob(['﻿'+head.join(';')+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download='some-performance.csv'; a.click();
+}
+
+/* ----------------------------------------------------------- render */
+function render(){
+  const list = visible();
+  chartData = buildSeries(list);
+  renderKpis(list); renderChart(); renderRows(list);
+}
+
+/* chips */
+document.getElementById('platChips').innerHTML = SERIES.map(s=>
+  `<button class="chip" data-plat="${s}" aria-pressed="true">
+     <i class="dot" style="background:${PLATFORMS[s].color}"></i>${PLATFORMS[s].name}</button>`).join('')
+  + `<button class="chip" data-plat="__all" aria-pressed="false">Alle</button>`;
+
+document.getElementById('platChips').addEventListener('click',e=>{
+  const b = e.target.closest('.chip'); if(!b) return;
+  const p = b.dataset.plat;
+  if(p==='__all'){ state.plats = new Set(SERIES); }
+  else { state.plats.has(p)?state.plats.delete(p):state.plats.add(p);
+         if(!state.plats.size) state.plats = new Set(SERIES); }
+  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',
+    c.dataset.plat==='__all' ? String(state.plats.size===3) : String(state.plats.has(c.dataset.plat))));
+  render();
+});
+document.getElementById('period').addEventListener('change',e=>{state.period=+e.target.value;render();});
+document.getElementById('mtype').addEventListener('change',e=>{state.mtype=e.target.value;render();});
+document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
+document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value;render();});
+document.getElementById('csv').addEventListener('click',()=>csv(visible()));
+document.getElementById('file').addEventListener('change',ev=>{
+  const f = ev.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{ try{
+      const doc = JSON.parse(rd.result);
+      POSTS = (doc.posts||[]).map(derive);
+      meta(doc); render();
+    }catch(err){ alert('Kunne ikke læse filen: '+err.message); } };
+  rd.readAsText(f);
+});
+document.querySelectorAll('[data-theme-set]').forEach(b=>b.addEventListener('click',()=>{
+  document.documentElement.dataset.theme = b.dataset.themeSet;
+  document.querySelectorAll('[data-theme-set]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  render();
+}));
+addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(renderChart,120);});
+
+function meta(doc){
+  const when = doc.generated_at ? new Date(doc.generated_at) : null;
+  const accs = (doc.accounts||[]).map(a=>a.name).join(' · ');
+  document.getElementById('subline').innerHTML =
+    (when?`Opdateret ${when.toLocaleString('da-DK',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}`:'Ingen tidsstempel')
+    + (accs?` · ${accs}`:'');
+  const demo = doc.source==='demo';
+  document.getElementById('srcBadge').textContent = demo?'Demo-data':'Live data';
+  document.getElementById('srcBadge').className = 'badge'+(demo?' demo':'');
+  document.getElementById('demoBanner').hidden = !demo;
+}
+meta(DATA);
+render();
+</script>
+</body>
+</html>
