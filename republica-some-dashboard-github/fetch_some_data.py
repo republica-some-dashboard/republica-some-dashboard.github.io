@@ -140,9 +140,28 @@ def ms_to_s(v):
 # ---------------------------------------------------------------- Facebook
 
 
+def page_token(page_id: str, user_token: str) -> str:
+    """Veksl bruger-/systembruger-token til et SIDE-token.
+
+    Uden dette svarer Graph API:
+      (#210) A page access token is required to request this resource.
+    Sidens opslag og insights kan kun læses med sidens eget token.
+    """
+    try:
+        d = get_json(f"{GRAPH}/{page_id}?fields=access_token&access_token={user_token}")
+        t = d.get("access_token")
+        if t:
+            return t
+        print("  · intet side-token i svaret — bruger det oprindelige", file=sys.stderr)
+    except RuntimeError as e:
+        print(f"  · kunne ikke veksle til side-token: {e}", file=sys.stderr)
+    return user_token
+
+
 def fetch_facebook(page_id: str, token: str, since: datetime) -> list[dict]:
     """/{page-id}/published_posts — Pagens egne opslag. /posts er udokumenteret,
     /feed blander besøgendes indhold ind og kræver ekstra permission."""
+    token = page_token(page_id, token)
     fields = (
         "id,created_time,message,permalink_url,full_picture,is_published,"
         "attachments{media_type,type,media},shares,"
