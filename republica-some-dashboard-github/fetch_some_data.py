@@ -168,16 +168,33 @@ def fetch_facebook(page_id: str, token: str, since: datetime) -> list[dict]:
         "comments.summary(true).limit(0),likes.summary(true).limit(0),"
         f"insights.metric({','.join(FB_BASE_METRICS)})"
     )
-    url = (f"{GRAPH}/{page_id}/published_posts?fields={urllib.parse.quote(fields)}"
-           f"&since={int(since.timestamp())}&limit=50&access_token={token}")
 
-    raw = []
-    while url:
-        d = get_json(url)
-        raw += d.get("data", [])
-        url = d.get("paging", {}).get("next")
-        if len(raw) > 400:
+    # /published_posts kræver pages_read_user_content, som er Advanced Access og
+    # kræver App Review. /feed skulle klare sig med pages_read_engagement til
+    # sidens eget indhold. Vi prøver den lempeligste først og noterer hvad der
+    # virkede, så vi ikke skal gætte igen.
+    fejl = []
+    raw, brugt = None, None
+    for edge in ("feed", "published_posts"):
+        url = (f"{GRAPH}/{page_id}/{edge}?fields={urllib.parse.quote(fields)}"
+               f"&since={int(since.timestamp())}&limit=50&access_token={token}")
+        try:
+            fundet = []
+            while url:
+                d = get_json(url)
+                fundet += d.get("data", [])
+                url = d.get("paging", {}).get("next")
+                if len(fundet) > 400:
+                    break
+            raw, brugt = fundet, edge
+            print(f"  · Facebook læst via /{edge}: {len(fundet)} opslag")
             break
+        except RuntimeError as e:
+            fejl.append(f"/{edge} → {e}")
+            print(f"  · /{edge} virkede ikke: {e}", file=sys.stderr)
+
+    if raw is None:
+        raise RuntimeError("begge endepunkter afvist. " + " | ".join(fejl))
 
     out = []
     for p in raw:
